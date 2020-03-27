@@ -49,13 +49,16 @@ namespace DataStructure_CinemaApp
                             string userName = Console.ReadLine();
                             Console.Write("Password : ");
                             string passWord = Console.ReadLine();
-                            foreach (var u in data.Users)
+
+                            var checkUser = data.Users.Where(u => u.Username == userName && u.Password == passWord).SingleOrDefault();
+
+                            if (checkUser == null)
                             {
-                                if (userName != u.Username || passWord != u.Password)
-                                {
-                                    Console.WriteLine("Invalid Username or Password");
-                                    break;
-                                }
+                                Console.WriteLine("Invalid Username or Password");
+                                break;
+                            }
+                            else
+                            {
                                 while (checktrue1)
                                 {
                                     Console.Clear();
@@ -71,7 +74,7 @@ namespace DataStructure_CinemaApp
                                         {
                                             case 1:
                                                 Console.Clear();
-                                                var movieList = data.Movie.Where(m => m.Status == Model.Status.NowShowing).ToList();
+                                                var movieList = data.Movie.Where(m => m.Status == Status.NowShowing).ToList();
 
                                                 var table1 = new ConsoleTable("Id", "Movie Title", "Release Date");
                                                 foreach (var item in movieList)
@@ -103,16 +106,18 @@ namespace DataStructure_CinemaApp
                                                     Console.Write("Enter Id to choose the movie time : ");
                                                     string timeId = Console.ReadLine();
 
-                                                    var AvailableTime = data.MovieTime.Where(mt => mt.MovieId.ToString() == movieId).ToList();
+                                                    var availableTimeSeat = (from ms in data.MovieSeat
+                                                                             join mt in data.MovieTime on ms.MovieTimeId equals mt.MovieTimeId
+                                                                             where mt.MovieId.ToString() == movieId
+                                                                             where ms.MovieTimeId.ToString() == timeId
+                                                                             select ms).ToList();
 
-                                                    var seatAvailable = data.MovieSeat.Where(ms => ms.MovieTimeId.ToString() == timeId).ToList();
-
-                                                    if (AvailableTime != null)
+                                                    if (availableTimeSeat.Count != 0)
                                                     {
                                                         Console.Clear();
                                                         Console.WriteLine("Cinema Hall Settings");
                                                         Console.WriteLine("E : Empty" + "\t" + "T : Taken");
-                                                        foreach (var item in seatAvailable)
+                                                        foreach (var item in availableTimeSeat)
                                                         {
                                                             Console.Write(item.Seat + item.SeatStatus + "\t");
                                                         }
@@ -128,25 +133,30 @@ namespace DataStructure_CinemaApp
                                                             {
                                                                 checkSeatNumber.SeatStatus = SeatStatus.T;
                                                                 Console.WriteLine("Select Seat Success");
+                                                                Console.ReadKey();
                                                             }
                                                             else
                                                             {
                                                                 Console.WriteLine("This seat is already be taken");
+                                                                Console.ReadKey();
                                                             }
                                                         }
                                                         else
                                                         {
                                                             Console.WriteLine("Invalid Seat Number");
+                                                            Console.ReadKey();
                                                         }
                                                     }
                                                     else
                                                     {
                                                         Console.WriteLine("Invalid Movie Time Id");
+                                                        Console.ReadKey();
                                                     }
                                                 }
                                                 else
                                                 {
                                                     Console.WriteLine("Invalid Movie Id");
+                                                    Console.ReadKey();
                                                 }
                                                 break;
 
@@ -157,17 +167,16 @@ namespace DataStructure_CinemaApp
 
                                             default:
                                                 Console.WriteLine("Invalid Option");
-                                                continue;
+                                                Console.ReadKey();
+                                                break;
                                         }
                                         break;
                                     }
                                     else
                                     {
                                         Console.WriteLine("Invalid Option");
-                                        break;
                                     }
                                 }
-                                break;
                             }
                             break;
 
